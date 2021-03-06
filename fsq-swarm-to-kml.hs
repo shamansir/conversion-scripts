@@ -11,6 +11,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 import Data.Aeson
+import Data.Aeson.Types
 import GHC.Generics
 import Data.ByteString.Lazy
 import qualified Data.ByteString.Lazy as B
@@ -35,6 +36,14 @@ instance FromJSON Venue
 instance FromJSON Checkin
 
 
+checkinsParser :: Value -> Parser [Checkin]
+checkinsParser = withObject "response" $ \o -> do
+  resp <- o .: "response"
+  checkins <- resp .: "checkins"
+  items <- checkins .: "items"
+  return items
+
+
 decodeCheckins :: Either String Checkin
 decodeCheckins = eitherDecode "{ \"venue\": { \"lat\": 10, \"long\": 20 } }"
 
@@ -44,7 +53,7 @@ main = do
   input <- B.readFile "./20210301_0_50.json"
   Prelude.putStrLn
     $ show
-    $ (eitherDecode input :: Either String Checkin)
+    $ (parseEither checkinsParser =<< eitherDecode input)
   Prelude.putStrLn
     $ show
     $ decodeCheckins
