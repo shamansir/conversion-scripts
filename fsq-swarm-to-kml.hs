@@ -17,10 +17,24 @@ import Data.ByteString.Lazy
 import qualified Data.ByteString.Lazy as B
 
 
+data Location =
+  Location
+  { address :: Maybe String
+  , lat :: Float
+  , lng :: Float
+  , postalCode :: Maybe String
+  , neighborhood :: Maybe String
+  , city :: Maybe String
+  , state :: Maybe String
+  , formattedAddress :: Maybe [String]
+  } deriving (Generic, Show)
+
+
+
 data Venue =
   Venue
-  { lat :: Float
-  , long :: Float
+  { name :: String
+  , location :: Location
   } deriving (Generic, Show)
 
 
@@ -28,10 +42,12 @@ data Venue =
 data Checkin =
    Checkin
    { venue :: Venue
-
+   , createdAt :: Int
+   , timezoneOffset :: Maybe Int
    } deriving (Generic,Show)
 
 
+instance FromJSON Location
 instance FromJSON Venue
 instance FromJSON Checkin
 
@@ -44,16 +60,9 @@ checkinsParser = withObject "response" $ \o -> do
   return items
 
 
-decodeCheckins :: Either String Checkin
-decodeCheckins = eitherDecode "{ \"venue\": { \"lat\": 10, \"long\": 20 } }"
-
-
 main :: IO ()
 main = do
   input <- B.readFile "./20210301_0_50.json"
   Prelude.putStrLn
     $ show
     $ (parseEither checkinsParser =<< eitherDecode input)
-  Prelude.putStrLn
-    $ show
-    $ decodeCheckins
