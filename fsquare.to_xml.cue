@@ -4,10 +4,23 @@ import "strings"
 
 let #checkins = response.checkins.items
 
-let #filtered =
+let #placemarks =
     [ for x in #checkins
-        { "<id attr=\"test\">\(x.id)</id>"
+        { """
+            <Placemark>
+                <name>\(x.venue.name)</name>
+                <description>\(x.venue.location.address)</description>
+                <Point>
+                    <coordinates>\(x.venue.location.lat),\(x.venue.location.lng),0</coordinates>
+                </Point>
+            </Placemark>
+            """
         }
     ]
 
-to_xml: "<xml>\(strings.Join(#filtered, "\n"))</xml>"
+to_xml: """
+    <?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    <kml xmlns=\"http://www.opengis.net/kml/2.2\">
+        \(strings.Join(#placemarks, "\n"))
+    </kml>
+    """
