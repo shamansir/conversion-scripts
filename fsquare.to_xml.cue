@@ -8,8 +8,9 @@ let #placemarks =
     [ for x in #checkins
         { """
             <Placemark>
+                <id>\(x.id)</id>
                 <name>\(x.venue.name)</name>
-                <description>\(x.venue.location.address)</description>
+                <description>\(*x.venue.location.address | "Unknown")</description>
                 <Point>
                     <coordinates>\(x.venue.location.lat),\(x.venue.location.lng),0</coordinates>
                 </Point>
